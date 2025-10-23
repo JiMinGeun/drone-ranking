@@ -5,108 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>드론 경주 실시간 순위</title>
   <style>
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background: linear-gradient(to bottom right, #00bcd4, #007bff);
-      color: #fff;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    h1 {
-      margin-top: 10px;
-      text-align: center;
-    }
-    table {
-      width: 90%;
-      max-width: 500px;
-      border-collapse: collapse;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-    }
-    th {
-      background: rgba(255,255,255,0.2);
-    }
-    .card {
-      background: rgba(0,0,0,0.3);
-      padding: 15px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 500px;
-      margin-top: 15px;
-      text-align: center;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    input {
-      width: 40%;
-    }
-    button {
-      background: #ffeb3b;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #adminSection, #passwordBox {
-      display: none;
-    }
-    .admin-only {
-      display: none;
-    }
+    :root { --bg1:#00bcd4; --bg2:#007bff; --glass:rgba(255,255,255,.12); --ink:#0f172a; }
+    *{box-sizing:border-box}
+    body{font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
+    h1{margin:6px 0 0;text-align:center;font-size:clamp(20px,4vw,28px)}
+    .wrap{width:100%;max-width:880px;display:flex;flex-direction:column;gap:12px}
+    .bar,.card{background:rgba(0,0,0,.22);backdrop-filter:blur(6px);border-radius:14px;padding:14px;box-shadow:0 8px 26px rgba(0,0,0,.18)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .sp{justify-content:space-between}
+    table{width:100%;border-collapse:collapse;background:var(--glass);border-radius:12px;overflow:hidden}
+    th,td{padding:11px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.28)}
+    th{background:rgba(255,255,255,.18);font-weight:700}
+    tr:last-child td{border-bottom:none}
+    input{padding:10px 12px;border-radius:10px;border:none;outline:none;background:#fff;color:var(--ink)}
+    button{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn{background:#ffeb3b;color:#111}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff}
+    .tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.2);font-size:12px}
+    /* 관리자 UI는 기본 숨김 */
+    .admin-only{display:none}
+    /* 비번 모달 */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal .box{width:100%;max-width:380px;background:#fff;color:#111;border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .modal h3{margin:0 0 8px}
+    .modal .row{justify-content:flex-end}
+    .danger{background:#ef4444;color:#fff}
+    .muted{opacity:.85}
   </style>
 </head>
 <body>
   <h1>🏁 드론 경주 실시간 순위</h1>
-  
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <span id="statusText">상태: 관람 모드</span>
-      <button id="loginBtn">🔐 관리자 로그인</button>
-      <button id="logoutBtn" class="admin-only">로그아웃</button>
+  <div class="wrap">
+    <!-- 상단 바 -->
+    <div class="bar row sp">
+      <div class="row"><span>상태:</span><span id="state" class="tag">관람 모드</span></div>
+      <div class="row">
+        <button id="adminBtn" class="btn-ghost">🔐 관리자</button>
+        <button id="logoutBtn" class="btn-ghost admin-only">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 순위표 -->
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>순위</th><th>이름</th><th>기록(초)</th><th id="thActions" class="admin-only">관리</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 관리자 입력 카드 -->
+    <div id="adminPanel" class="card admin-only">
+      <h3 style="margin:6px 0 10px">기록 추가 / 수정</h3>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <input id="nameInput" placeholder="이름" />
+        <input id="timeInput" type="number" step="0.01" placeholder="기록(초)" />
+        <button id="saveBtn" class="btn">등록/업데이트</button>
+        <button id="resetBtn" class="btn-ghost danger">전체 초기화</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">※ 같은 이름을 다시 저장하면 기록이 업데이트됩니다.</p>
     </div>
   </div>
 
-  <!-- 관리자 비밀번호 입력 -->
-  <div id="passwordBox" class="card">
-    <h3>관리자 비밀번호 입력</h3>
-    <input type="password" id="passwordInput" placeholder="비밀번호 입력" />
-    <button id="confirmBtn">확인</button>
+  <!-- 비밀번호 모달 -->
+  <div id="pwModal" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3>관리자 비밀번호</h3>
+      <input id="pwInput" type="password" placeholder="비밀번호 입력" style="width:100%" />
+      <div class="row" style="margin-top:10px">
+        <button id="pwCancel" class="btn-ghost">취소</button>
+        <button id="pwOk" class="btn">확인</button>
+      </div>
+      <p class="muted" style="margin-top:6px">행사용 간단 보호입니다. 강한 보안이 필요하면 Firebase Authentication을 사용하세요.</p>
+    </div>
   </div>
 
-  <table>
-    <thead>
-      <tr><th>순위</th><th>이름</th><th>기록(초)</th><th class="admin-only">관리</th></tr>
-    </thead>
-    <tbody id="rankingBody"></tbody>
-  </table>
-
-  <div id="adminSection" class="card">
-    <h3>기록 추가 / 수정</h3>
-    <input type="text" id="nameInput" placeholder="이름" />
-    <input type="number" id="timeInput" step="0.01" placeholder="기록(초)" />
-    <button id="addBtn">등록 / 수정</button>
-    <button id="resetBtn" style="background:#f55; color:#fff;">전체 초기화</button>
-  </div>
-
-  <!-- Firebase SDK -->
+  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 
   <script>
+    // Firebase 설정 (당신 프로젝트)
     const firebaseConfig = {
       apiKey: "AIzaSyDQdYziYofadFexbv9CjgaSDoV701kJq7eo",
       authDomain: "studio-1121796292-145f8.firebaseapp.com",
@@ -116,60 +98,114 @@
       messagingSenderId: "505956643695",
       appId: "1:505956643695:web:6766fd9a4cb3b87d35409a"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const ADMIN_PASSWORD = "dogae123!"; // ✅ 변경 가능
+    // 간이 관리자 비밀번호 (필요시 변경)
+    const ADMIN_PASSWORD = "droneadmin";
 
+    // 상태
     let isAdmin = false;
-    const rankingBody = document.getElementById("rankingBody");
-    const adminSection = document.getElementById("adminSection");
-    const passwordBox = document.getElementById("passwordBox");
-    const statusText = document.getElementById("statusText");
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const confirmBtn = document.getElementById("confirmBtn");
-    const passwordInput = document.getElementById("passwordInput");
+    // DOM
+    const state = document.getElementById('state');
+    const adminBtn = document.getElementById('adminBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const thActions = document.getElementById('thActions');
+    const tbody = document.getElementById('tbody');
 
-    loginBtn.onclick = () => {
-      passwordBox.style.display = "block";
-      passwordInput.value = "";
-    };
+    const nameInput = document.getElementById('nameInput');
+    const timeInput = document.getElementById('timeInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const resetBtn = document.getElementById('resetBtn');
 
-    confirmBtn.onclick = () => {
-      const pw = passwordInput.value.trim();
-      if (pw === ADMIN_PASSWORD) {
-        isAdmin = true;
-        passwordBox.style.display = "none";
-        updateAdminUI();
-        alert("관리자 모드로 전환되었습니다.");
-      } else {
-        alert("비밀번호가 올바르지 않습니다.");
-      }
-    };
+    const pwModal = document.getElementById('pwModal');
+    const pwInput = document.getElementById('pwInput');
+    const pwOk = document.getElementById('pwOk');
+    const pwCancel = document.getElementById('pwCancel');
 
-    logoutBtn.onclick = () => {
-      isAdmin = false;
-      updateAdminUI();
-    };
-
-    function updateAdminUI() {
-      const adminOnly = document.querySelectorAll(".admin-only");
-      adminOnly.forEach(el => el.style.display = isAdmin ? "" : "none");
-      adminSection.style.display = isAdmin ? "block" : "none";
-      statusText.textContent = isAdmin ? "상태: 관리자 모드" : "상태: 관람 모드";
+    // 공통: 관리자 UI 토글
+    function applyAdminUI(){
+      document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display = isAdmin ? '' : 'none'; });
+      adminPanel.style.display = isAdmin ? '' : 'none';
+      thActions.style.display = isAdmin ? '' : 'none';
+      state.textContent = isAdmin ? '관리자 모드' : '관람 모드';
+      adminBtn.textContent = isAdmin ? '🔐 관리자(ON)' : '🔐 관리자';
+      logoutBtn.style.display = isAdmin ? '' : 'none';
+      render();
     }
 
-    const nameInput = document.getElementById("nameInput");
-    const timeInput = document.getElementById("timeInput");
-    const addBtn = document.getElementById("addBtn");
-    const resetBtn = document.getElementById("resetBtn");
+    // 모달 열고닫기
+    function openModal(){ pwModal.style.display='flex'; pwInput.value=''; pwInput.focus(); }
+    function closeModal(){ pwModal.style.display='none'; }
 
-    addBtn.onclick = async () => {
-      if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
-      const name = nameInput.value.trim();
-      const time = parseFloat(timeInput.value);
-      if (!name || isNaN(time)) return alert("이름과 기록을 모두 입력하세요.");
-      await db.ref("participants/" + name).set({ name, time });
+    adminBtn.onclick = ()=>{ if(!isAdmin) openModal(); };
+    pwCancel.onclick = closeModal;
+    pwOk.onclick = ()=>{
+      if(pwInput.value === ADMIN_PASSWORD){
+        isAdmin = true; closeModal(); applyAdminUI(); alert('관리자 모드로 전환되었습니다.');
+      } else { alert('비밀번호가 올바르지 않습니다.'); }
+    };
+    logoutBtn.onclick = ()=>{ isAdmin = false; applyAdminUI(); };
+
+    // 데이터 조작
+    async function saveRecord(){
+      if(!isAdmin) return alert('관리자만 사용할 수 있습니다.');
+      const name=(nameInput.value||'').trim();
+      const time=parseFloat(timeInput.value);
+      if(!name || isNaN(time)) return alert('이름과 기록(초)을 모두 입력하세요.');
+      await db.ref('participants/'+name).set({name,time});
+      nameInput.value=''; timeInput.value='';
+    }
+    async function removeAll(){
+      if(!isAdmin) return alert('관리자만 사용할 수 있습니다.');
+      if(confirm('정말 전체 데이터를 초기화할까요?')) await db.ref('participants').remove();
+    }
+    function editRecord(name,time){
+      if(!isAdmin) return alert('관리자만 사용할 수 있습니다.');
+      nameInput.value=name; timeInput.value=time; window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+    }
+    async function deleteRecord(name){
+      if(!isAdmin) return alert('관리자만 사용할 수 있습니다.');
+      if(confirm(`정말 "${name}" 기록을 삭제할까요?`)) await db.ref('participants/'+name).remove();
+    }
+
+    saveBtn.onclick = saveRecord;
+    resetBtn.onclick = removeAll;
+
+    // 렌더링
+    let cached = [];
+    function render(){
+      const list = [...cached].sort((a,b)=>Number(a.time)-Number(b.time));
+      tbody.innerHTML = list.map((p,i)=>{
+        const actions = isAdmin ? `
+          <td class="admin-only">
+            <div class="row" style="justify-content:center">
+              <button class="btn-ghost" onclick="editRecord('${p.name.replace(/'/g,"&#39;")}', ${Number(p.time)})">수정</button>
+              <button class="btn-ghost danger" onclick="deleteRecord('${p.name.replace(/'/g,"&#39;")}')">삭제</button>
+            </div>
+          </td>` : '<td class="admin-only"></td>';
+        return `<tr>
+          <td>${i+1}</td>
+          <td>${p.name}</td>
+          <td>${Number(p.time).toFixed(2)}</td>
+          ${actions}
+        </tr>`;
+      }).join('');
+    }
+
+    // 실시간 구독
+    db.ref('participants').on('value', snap => {
+      const data = snap.val() || {}; cached = Object.values(data); render();
+    });
+
+    // 초기 UI
+    applyAdminUI();
+
+    // 전역에서 쓰는 핸들러 노출 (테이블 onclick용)
+    window.editRecord = editRecord;
+    window.deleteRecord = deleteRecord;
+  </script>
+</body>
+</html>

@@ -21,7 +21,7 @@
       margin:0; font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink);
       background:linear-gradient(180deg,#f7f2ff, #f1eaff 60%, #efe7ff);
     }
-    header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffff80; border-bottom:1px solid #ffffff;}
+    header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
     header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
     .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
     .logo img{height:40px; width:auto; border-radius:50%;}
@@ -54,6 +54,8 @@
     .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center}
     .modal::before{content:''; position:absolute; inset:0; background:rgba(0,0,0,.45)}
     .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px}
+    .form-row{display:flex; gap:8px; margin-top:10px}
+    input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
 
     .hidden{display:none !important}
   </style>
@@ -62,6 +64,7 @@
   <header>
     <div class="inner">
       <div class="logo">
+        <!-- 배지/로고 이미지: 파일명을 프로젝트에 맞게 바꿔도 됨 -->
         <img src="1786eab4-6cb1-4b30-911d-5d1b2542afe7.png" alt="DOGO 로고">
         <span>DOGO</span>
       </div>
@@ -74,6 +77,7 @@
   </header>
 
   <main class="container">
+    <!-- 공개 랭킹 뷰 -->
     <section id="viewPublic">
       <div class="card ranking">
         <h3 class="title-center" style="color:var(--primary); margin-top:0">랭킹</h3>
@@ -91,6 +95,7 @@
       </div>
     </section>
 
+    <!-- 관리자 뷰 -->
     <section id="viewAdmin" class="hidden">
       <div class="adminHeader">
         <button id="backBtn" class="btn btn-primary">← 뒤로가기</button>
@@ -113,8 +118,219 @@
     </section>
   </main>
 
+  <!-- 비밀번호 모달 -->
+  <div id="pwModal" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3 style="margin:0 0 10px">관리자 비밀번호</h3>
+      <input id="pwInput" type="password" placeholder="비밀번호 입력" />
+      <div class="form-row" style="justify-content:flex-end">
+        <button id="pwCancel" class="btn btn-ghost">취소</button>
+        <button id="pwOk" class="btn btn-primary">확인</button>
+      </div>
+      <p class="sub" style="margin:6px 0 0">* 간단 보호용입니다. 보안이 필요하면 Firebase Auth 권장</p>
+    </div>
+  </div>
+
+  <!-- 추가/수정 모달 -->
+  <div id="formModal" class="modal" aria-hidden="true">
+    <div class="box">
+      <h3 id="formTitle" style="margin:0 0 10px">기록 추가</h3>
+      <div class="form-row">
+        <input id="nameInput" placeholder="이름" />
+        <input id="classInput" placeholder="학급 (예: 고1-3)" />
+      </div>
+      <div class="form-row">
+        <input id="timeInput" placeholder="기록 (예: 05:07.008 또는 307.008)" />
+      </div>
+      <div class="form-row" style="justify-content:flex-end">
+        <button id="formCancel" class="btn btn-ghost">취소</button>
+        <button id="formSave" class="btn btn-primary">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+
   <script>
-    // 여기에 기존 firebase 코드와 js 동작 부분이 그대로 유지됩니다.
+    // ===== Firebase 설정 =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQdYziYofadFexbv9CjgaSDoV701kJq7eo",
+      authDomain: "studio-1121796292-145f8.firebaseapp.com",
+      databaseURL: "https://studio-1121796292-145f8-default-rtdb.firebaseio.com",
+      projectId: "studio-1121796292-145f8",
+      storageBucket: "studio-1121796292-145f8.appspot.com",
+      messagingSenderId: "505956643695",
+      appId: "1:505956643695:web:6766fd9a4cb3b87d35409a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ===== 간이 관리자 비밀번호 =====
+    const ADMIN_PASSWORD = "dogae123!";
+
+    // ===== 상태 / DOM =====
+    let isAdmin = JSON.parse(sessionStorage.getItem('isAdmin') || 'false');
+    let editingKey = null; // 편집 중 키 (이름 기반)
+
+    const viewPublic = document.getElementById('viewPublic');
+    const viewAdmin  = document.getElementById('viewAdmin');
+    const tbodyPublic = document.getElementById('tbodyPublic');
+    const tbodyAdmin  = document.getElementById('tbodyAdmin');
+
+    const adminBtn = document.getElementById('adminBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const backBtn = document.getElementById('backBtn');
+    const addBtn = document.getElementById('addBtn');
+
+    const pwModal = document.getElementById('pwModal');
+    const pwInput = document.getElementById('pwInput');
+    const pwOk = document.getElementById('pwOk');
+    const pwCancel = document.getElementById('pwCancel');
+
+    const formModal = document.getElementById('formModal');
+    const formTitle = document.getElementById('formTitle');
+    const nameInput = document.getElementById('nameInput');
+    const classInput = document.getElementById('classInput');
+    const timeInput = document.getElementById('timeInput');
+    const formSave = document.getElementById('formSave');
+    const formCancel = document.getElementById('formCancel');
+
+    // ===== 유틸 =====
+    const esc = s => String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+
+    function parseTimeToMs(v){
+      // 입력: "mm:ss.mmm" 또는 총초(초.밀리)
+      const s = String(v).trim();
+      if(!s) return NaN;
+      if(s.includes(':')){
+        const [mm, rest] = s.split(':');
+        const [ss, ms='0'] = rest.split('.');
+        const minutes = parseInt(mm,10)||0;
+        const seconds = parseInt(ss,10)||0;
+        const millis  = parseInt(String(ms).padEnd(3,'0').slice(0,3),10)||0;
+        return (minutes*60 + seconds)*1000 + millis;
+      }
+      const num = Number(s);
+      if(isNaN(num)) return NaN;
+      return Math.round(num*1000);
+    }
+    function formatMs(ms){
+      if(ms==null || isNaN(ms)) return '-';
+      const total = Math.max(0, Math.round(ms));
+      const minutes = Math.floor(total/60000);
+      const seconds = Math.floor((total%60000)/1000);
+      const millis  = total%1000;
+      const mm = String(minutes).padStart(2,'0');
+      const ss = String(seconds).padStart(2,'0');
+      const mmm= String(millis).padStart(3,'0');
+      return `${mm}:${ss}.${mmm}`;
+    }
+    function toggleView(){
+      viewPublic.classList.toggle('hidden', isAdmin);
+      viewAdmin.classList.toggle('hidden', !isAdmin);
+      adminBtn.classList.toggle('hidden', isAdmin);
+      logoutBtn.classList.toggle('hidden', !isAdmin);
+      sessionStorage.setItem('isAdmin', JSON.stringify(isAdmin));
+    }
+    function open(el){ el.style.display='flex'; }
+    function close(el){ el.style.display='none'; }
+
+    // ===== 모달/버튼 동작 =====
+    adminBtn.onclick = ()=>{ if(!isAdmin){ open(pwModal); pwInput.value=''; pwInput.focus(); } };
+    pwOk.onclick = ()=>{
+      if(pwInput.value === ADMIN_PASSWORD){ isAdmin = true; toggleView(); close(pwModal); }
+      else alert('비밀번호가 올바르지 않습니다.');
+    }
+    pwCancel.onclick = ()=> close(pwModal);
+    logoutBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
+    backBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
+
+    addBtn.onclick = ()=>{
+      editingKey = null;
+      formTitle.textContent = '기록 추가';
+      nameInput.value=''; classInput.value=''; timeInput.value='';
+      open(formModal); nameInput.focus();
+    };
+    formCancel.onclick = ()=> close(formModal);
+
+    formSave.onclick = async ()=>{
+      const name = nameInput.value.trim();
+      const klass = classInput.value.trim();
+      const ms = parseTimeToMs(timeInput.value);
+      if(!name || isNaN(ms)) return alert('이름과 시간 형식을 확인하세요. 예) 05:07.008');
+      const key = editingKey || name; // 간단 버전: 이름을 키로 사용
+      await db.ref('participants/'+key).set({name, klass, timeMs: ms, time: (ms/1000)});
+      close(formModal);
+    };
+
+    function onEdit(p){
+      editingKey = p.name;
+      formTitle.textContent = '기록 수정';
+      nameInput.value = p.name || '';
+      classInput.value = p.klass || '';
+      timeInput.value = formatMs(p.timeMs ?? (Number(p.time)||0)*1000);
+      open(formModal);
+    }
+    async function onDelete(p){
+      if(confirm(`정말 "${p.name}" 데이터를 삭제할까요?`)){
+        await db.ref('participants/'+p.name).remove();
+      }
+    }
+
+    // ===== 렌더링 =====
+    let list = [];
+    function renderPublic(){
+      if(list.length===0){
+        tbodyPublic.innerHTML = `<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>`; return;
+      }
+      tbodyPublic.innerHTML = list.map((p,i)=>{
+        const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
+        const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
+        return `<tr>
+          <td class="rank-badge">${badge}</td>
+          <td><div class="name">${esc(p.name)}</div></td>
+          <td>${esc(p.klass||'')}</td>
+          <td class="mono">${formatMs(p.timeMs ?? (Number(p.time)||0)*1000)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderAdmin(){
+      tbodyAdmin.innerHTML = list.map(p=>{
+        return `<tr>
+          <td>${esc(p.name)}</td>
+          <td>${esc(p.klass||'')}</td>
+          <td class="mono">${formatMs(p.timeMs ?? (Number(p.time)||0)*1000)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-ghost" onclick='editRow("${esc(p.name)}")'>✎</button>
+              <button class="btn btn-danger" onclick='deleteRow("${esc(p.name)}")'>🗑</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // 전역 핸들러(테이블 내 onClick에서 사용)
+    window.editRow = (name)=>{ const p = list.find(x=>x.name===name); if(p) onEdit(p); }
+    window.deleteRow = async (name)=>{ const p = list.find(x=>x.name===name); if(p) await onDelete(p); }
+
+    // ===== 실시간 구독 =====
+    db.ref('participants').on('value', snap => {
+      const data = snap.val() || {};
+      list = Object.values(data).sort((a,b)=>{
+        const ams = (a.timeMs ?? (Number(a.time)||0)*1000);
+        const bms = (b.timeMs ?? (Number(b.time)||0)*1000);
+        return ams - bms;
+      });
+      renderPublic();
+      renderAdmin();
+    });
+
+    // 초기 표시
+    toggleView();
   </script>
 </body>
 </html>

@@ -1,74 +1,105 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>드론 경주 실시간 순위</title>
-<style>
-body {
-font-family: 'Noto Sans KR', sans-serif;
-background: linear-gradient(to bottom right, #007bff, #00bcd4);
-color: white;
-margin: 0;
-padding: 0;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-height: 100vh;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>드론 경주 실시간 순위</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(to bottom right, #007bff, #00bcd4);
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 { margin-bottom: 10px; text-align: center; }
+    table {
+      width: 90%; max-width: 500px; border-collapse: collapse;
+      background-color: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;
+    }
+    th, td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.3); }
+    th { background-color: rgba(255,255,255,0.2); }
+    #adminSection {
+      margin-top: 20px; text-align: center;
+      background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;
+    }
+    input {
+      padding: 5px; margin: 5px; border-radius: 5px;
+      border: none; outline: none;
+    }
+    button {
+      background-color: #ffeb3b; border: none; border-radius: 5px;
+      padding: 7px 15px; cursor: pointer; font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏁 드론 경주 실시간 순위</h1>
+  <table>
+    <thead>
+      <tr><th>순위</th><th>이름</th><th>기록(초)</th></tr>
+    </thead>
+    <tbody id="rankingBody"></tbody>
+  </table>
 
+  <div id="adminSection">
+    <h3>관리자 기록 입력</h3>
+    <input type="text" id="nameInput" placeholder="이름 입력">
+    <input type="number" id="timeInput" placeholder="기록(초)">
+    <button onclick="addRecord()">등록</button>
+  </div>
 
-h1 {
-margin-bottom: 10px;
-font-size: 2rem;
-text-align: center;
-}
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js"></script>
 
+  <script>
+    // 🔥 Firebase 설정 (당신의 프로젝트 정보)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQdYziYofadFexbv9CjgaSDoV701kJq7eo",
+      authDomain: "studio-1121796292-145f8.firebaseapp.com",
+      databaseURL: "https://studio-1121796292-145f8-default-rtdb.firebaseio.com",
+      projectId: "studio-1121796292-145f8",
+      storageBucket: "studio-1121796292-145f8.appspot.com",
+      messagingSenderId: "505956643695",
+      appId: "1:505956643695:web:6766fd9a4cb3b87d35409a"
+    };
 
-#rankingTable {
-width: 90%;
-max-width: 500px;
-border-collapse: collapse;
-background-color: rgba(255, 255, 255, 0.1);
-border-radius: 10px;
-overflow: hidden;
-}
+    // Firebase 초기화
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    const rankingBody = document.getElementById('rankingBody');
+    const nameInput = document.getElementById('nameInput');
+    const timeInput = document.getElementById('timeInput');
 
-th, td {
-padding: 10px;
-text-align: center;
-border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
+    // 기록 추가 함수
+    function addRecord() {
+      const name = nameInput.value.trim();
+      const time = parseFloat(timeInput.value);
+      if (!name || isNaN(time)) {
+        alert('이름과 기록을 모두 입력해주세요.');
+        return;
+      }
+      firebase.database().ref('participants/' + name).set({ name, time });
+      nameInput.value = '';
+      timeInput.value = '';
+    }
 
-
-th {
-background-color: rgba(255, 255, 255, 0.2);
-}
-
-
-#adminSection {
-margin-top: 20px;
-text-align: center;
-background-color: rgba(0, 0, 0, 0.2);
-padding: 10px;
-border-radius: 10px;
-}
-
-
-input {
-padding: 5px;
-margin: 5px;
-border-radius: 5px;
-border: none;
-outline: none;
-}
-
-
-button {
-background-color: #ffeb3b;
-border: none;
-border-radius: 5px;
-padding: 7px 15px;
+    // 실시간 데이터 업데이트
+    firebase.database().ref('participants').on('value', snapshot => {
+      const data = snapshot.val();
+      const list = data ? Object.values(data) : [];
+      list.sort((a, b) => a.time - b.time);
+      rankingBody.innerHTML = list.map((p, i) => 
+        `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.time}</td></tr>`
+      ).join('');
+    });
+  </script>
+</body>
 </html>

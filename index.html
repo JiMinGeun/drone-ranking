@@ -5,40 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>드론 경주 실시간 순위</title>
   <style>
-    :root { --bg1:#00bcd4; --bg2:#007bff; --glass:rgba(255,255,255,.12); --ink:#0f172a; }
+    :root{
+      --bg1:#0ea5e9; --bg2:#0284c7; --ink:#0b1220;
+      --glass:rgba(255,255,255,.14); --glass-2:rgba(255,255,255,.22);
+      --card:rgba(4, 13, 33, .30);
+      --accent:#fcd34d; /* 버튼 기본 */
+      --danger:#ef4444; /* 삭제/초기화 */
+      --ok:#22c55e;     /* 성공 */
+    }
     *{box-sizing:border-box}
-    body{font-family:'Noto Sans KR',system-ui,Segoe UI,Roboto,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff;margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
-    h1{margin:6px 0 0;text-align:center;font-size:clamp(20px,4vw,28px)}
-    .wrap{width:100%;max-width:880px;display:flex;flex-direction:column;gap:12px}
-    .bar,.card{background:rgba(0,0,0,.22);backdrop-filter:blur(6px);border-radius:14px;padding:14px;box-shadow:0 8px 26px rgba(0,0,0,.18)}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    html,body{height:100%}
+    body{
+      font-family: 'Noto Sans KR', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1200px 1200px at 20% 0%, #22d3ee55, transparent 60%),
+                  radial-gradient(1200px 1200px at 100% 20%, #60a5fa44, transparent 60%),
+                  linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:#fff; margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; gap:16px; padding:18px;
+    }
+    h1{margin:6px 0 0; text-align:center; font-size:clamp(22px,4vw,34px); letter-spacing:.2px; display:flex; align-items:center; gap:10px}
+    h1 .flag{font-size:22px; filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));}
+    .wrap{width:100%; max-width:980px; display:flex; flex-direction:column; gap:14px}
+
+    /* Cards / surfaces */
+    .bar,.card{
+      position:relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:16px; padding:16px 18px;
+      box-shadow: 0 12px 30px rgba(2, 8, 23, .28), inset 0 1px 0 rgba(255,255,255,.1);
+      backdrop-filter: blur(8px);
+    }
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
     .sp{justify-content:space-between}
-    table{width:100%;border-collapse:collapse;background:var(--glass);border-radius:12px;overflow:hidden}
-    th,td{padding:11px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.28)}
-    th{background:rgba(255,255,255,.18);font-weight:700}
+
+    /* Status pill */
+    .tag{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:var(--glass); border:1px solid var(--glass-2); font-size:13px}
+    .tag.dot::before{content:''; width:8px; height:8px; border-radius:999px; background:#94a3b8}
+    .is-admin .tag.dot::before{background:#34d399}
+
+    /* Buttons */
+    button{border:none; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; transition: transform .08s ease, box-shadow .2s ease, background .2s ease}
+    .btn{background:var(--accent); color:#111; box-shadow: 0 6px 16px rgba(252, 211, 77,.35)}
+    .btn:hover{transform: translateY(-1px)}
+    .btn-ghost{background:rgba(255,255,255,.10); color:#fff; border:1px solid rgba(255,255,255,.22)}
+    .btn-ghost:hover{background:rgba(255,255,255,.16)}
+    .btn-danger{background:var(--danger); color:#fff; box-shadow: 0 6px 16px rgba(239,68,68,.35)}
+
+    /* Table */
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px;}
+    thead th{background:rgba(255,255,255,.18);}
+    th,td{padding:12px 10px; text-align:center; border-bottom:1px solid rgba(255,255,255,.22)}
     tr:last-child td{border-bottom:none}
-    input{padding:10px 12px;border-radius:10px;border:none;outline:none;background:#fff;color:var(--ink)}
-    button{border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn{background:#ffeb3b;color:#111}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff}
-    .tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.2);font-size:12px}
-    /* 관리자 UI는 기본 숨김 */
+    tbody tr{background:rgba(255,255,255,.08)}
+    tbody tr:nth-child(even){background:rgba(255,255,255,.05)}
+    tbody tr:hover{background:rgba(255,255,255,.12)}
+
+    /* Admin panel */
+    #adminPanel{display:none}
     .admin-only{display:none}
-    /* 비번 모달 */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
-    .modal .box{width:100%;max-width:380px;background:#fff;color:#111;border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .modal h3{margin:0 0 8px}
-    .modal .row{justify-content:flex-end}
-    .danger{background:#ef4444;color:#fff}
-    .muted{opacity:.85}
+    input{padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.22); outline:none; background:#ffffff; color:var(--ink); min-width:160px}
+
+    /* Modal password */
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; backdrop-filter: blur(2px);}
+    .modal::before{content:''; position:absolute; inset:0; background:rgba(0,0,0,.45)}
+    .modal .box{position:relative; z-index:1; width:100%; max-width:420px; background:#0b1220; color:#e5e7eb; border:1px solid rgba(255,255,255,.18); border-radius:16px; padding:18px; box-shadow:0 16px 40px rgba(0,0,0,.5)}
+    .modal h3{margin:0 0 10px}
+    .modal .box input{width:100%}
+
+    /* Small screens */
+    @media (max-width:560px){
+      .row{gap:8px}
+      input{min-width:130px}
+      th:nth-child(4), td:nth-child(4){
+        /* On phones, shrink actions column */
+        white-space:nowrap
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>🏁 드론 경주 실시간 순위</h1>
+  <h1><span class="flag">🏁</span> 드론 경주 실시간 순위</h1>
   <div class="wrap">
     <!-- 상단 바 -->
     <div class="bar row sp">
-      <div class="row"><span>상태:</span><span id="state" class="tag">관람 모드</span></div>
+      <div class="row"><span class="muted">상태:</span><span id="state" class="tag dot">관람 모드</span></div>
+      <div class="row">
+        <button id="adminBtn" class="btn-ghost">🔐 관리자</button>
+        <button id="logoutBtn" class="btn-ghost admin-only">로그아웃</button>
+      </div>
+    </div>
       <div class="row">
         <button id="adminBtn" class="btn-ghost">🔐 관리자</button>
         <button id="logoutBtn" class="btn-ghost admin-only">로그아웃</button>
@@ -102,7 +157,7 @@
     const db = firebase.database();
 
     // 간이 관리자 비밀번호 (필요시 변경)
-    const ADMIN_PASSWORD = "droneadmin";
+    const ADMIN_PASSWORD = "dogae123!";
 
     // 상태
     let isAdmin = false;
@@ -144,7 +199,9 @@
     pwCancel.onclick = closeModal;
     pwOk.onclick = ()=>{
       if(pwInput.value === ADMIN_PASSWORD){
-        isAdmin = true; closeModal(); applyAdminUI(); alert('관리자 모드로 전환되었습니다.');
+        isAdmin = true; closeModal(); applyAdminUI();
+      // body 클래스 토글로 상태 pill 색상 변경
+      document.body.classList.toggle('is-admin', isAdmin); alert('관리자 모드로 전환되었습니다.');
       } else { alert('비밀번호가 올바르지 않습니다.'); }
     };
     logoutBtn.onclick = ()=>{ isAdmin = false; applyAdminUI(); };

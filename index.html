@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>드론 레이싱</title>
   <style>
     :root{
@@ -18,25 +18,31 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink);
+      margin:0;
+      font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      color:var(--ink);
       background:linear-gradient(180deg,#f7f2ff, #f1eaff 60%, #efe7ff);
-      font-size: clamp(14px, 2.6vw, 16px);
+      font-size:clamp(14px,2.6vw,16px);
     }
+
+    /* Header */
     header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
     header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
     .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
     .logo img{height:clamp(28px, 6vw, 50px); width:auto; border-radius:50%;}
     .title-center{font-weight:800; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink);}
 
+    /* Buttons */
     .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:12px; font-weight:700}
     .btn-primary{background:var(--primary); color:#fff}
     .btn-ghost{background:#fff; color:var(--ink); border:1px solid #e5e7eb}
     .btn-danger{background:var(--danger); color:#fff}
 
+    /* Layout */
     .container{max-width:980px; margin:0 auto; padding:clamp(12px,4vw,20px)}
     .card{background:var(--card); border:1px solid #eee; border-radius:16px; padding:18px; box-shadow:0 10px 26px rgba(17,12,46,.08)}
 
-    /* 표(데스크톱/태블릿) */
+    /* Table (desktop/tablet) */
     .ranking{overflow:hidden}
     .table-wrap{width:100%; overflow-x:auto}
     table{width:100%; border-collapse:collapse}
@@ -49,48 +55,50 @@
     .medal.silver{background:#eef2ff; color:#475569}
     .medal.bronze{background:#fff0d6; color:#b45309}
     .name{font-weight:700}
-    .sub{font-size:12px; color:#6b7280; margin-top:4px}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; letter-spacing:.6px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; font-weight:700; letter-spacing:.6px}
 
-    /* B안: 모바일에서 카드형 리스트 표시 */
+    /* B안: 모바일 카드형 */
     .list-cards{display:none}
-    .list-card{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff}
+    .list-card{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff
+    }
     .list-card .who{display:flex; align-items:flex-start; gap:10px}
     .list-card .names{display:flex; flex-direction:column}
     .list-card .klass{font-size:12px; color:var(--muted)}
-    .list-card .time{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:700}
+    .list-card .time{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:700}
 
-    /* 관리자 */
+    /* Admin section */
     .adminHeader{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
     .actions{display:flex; gap:8px}
+
+    /* Modals */
     .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center}
     .modal::before{content:''; position:absolute; inset:0; background:rgba(0,0,0,.45)}
     .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px}
-    .form-row{display:flex; gap:8px; margin-top:10px}
+    .form-row{display:flex; gap:8px; margin-top:10px; justify-content:center;} /* 중앙정렬 */
     input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
 
     .hidden{display:none !important}
+    img{max-width:100%; height:auto}
 
-    /* 반응형 전환 지점 */
-    @media (max-width: 540px){
+    /* Responsive switch */
+    @media (max-width:540px){
       .ranking table{display:none}
       .list-cards{display:flex; flex-direction:column; gap:10px}
     }
-    @media (max-width: 360px){
+    @media (max-width:360px){
       .logo span{display:none}
       .title-center{font-size:16px}
     }
-
-    /* 이미지가 영역을 넘지 않도록 기본 가드 */
-    img{max-width:100%; height:auto}
   </style>
 </head>
 <body>
   <header>
     <div class="inner">
       <div class="logo">
-        <!-- 배지/로고 이미지: 프로젝트에 실제로 올린 파일명으로 변경하세요 -->
-        <img src="drone.png" alt="DOGO 로고" style="width:80px; height:auto;">>
+        <!-- 실제 업로드한 파일명으로 src를 바꿔주세요 -->
+        <img src="drone.png" alt="DOGO 로고">
         <span>DOGO</span>
       </div>
       <div class="title-center">드론 레이싱</div>
@@ -102,7 +110,7 @@
   </header>
 
   <main class="container">
-    <!-- 공개 랭킹 뷰 -->
+    <!-- 공개 랭킹 -->
     <section id="viewPublic">
       <div class="card ranking">
         <h3 class="title-center" style="color:var(--primary); margin-top:0">랭킹</h3>
@@ -110,12 +118,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>RANK</th>
-                <th>NAME</th>
-                <th>CLASS</th>
-                <th>TIME</th>
-              </tr>
+              <tr><th>RANK</th><th>NAME</th><th>CLASS</th><th>TIME</th></tr>
             </thead>
             <tbody id="tbodyPublic"></tbody>
           </table>
@@ -135,14 +138,7 @@
         <h3 style="margin:6px 0 14px">기록 관리</h3>
         <div class="table-wrap">
           <table class="table-admin">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Time</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Name</th><th>Class</th><th>Time</th><th>Actions</th></tr></thead>
             <tbody id="tbodyAdmin"></tbody>
           </table>
         </div>
@@ -150,7 +146,7 @@
     </section>
   </main>
 
-  <!-- 비밀번호 모달 -->
+  <!-- 관리자 비밀번호 모달 -->
   <div id="pwModal" class="modal" aria-hidden="true">
     <div class="box">
       <h3 style="margin:0 0 10px">관리자 비밀번호</h3>
@@ -173,14 +169,14 @@
       <div class="form-row">
         <input id="timeInput" placeholder="기록 (예: 05:07.008 또는 307.008)" />
       </div>
-      <div class="form-row" style="justify-content:flex-end">
+      <div class="form-row">
         <button id="formCancel" class="btn btn-ghost">취소</button>
         <button id="formSave" class="btn btn-primary">저장</button>
       </div>
     </div>
   </div>
 
-  <!-- Firebase compat SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 
@@ -198,18 +194,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ===== 간이 관리자 비밀번호 =====
+    // ===== 상태/DOM =====
     const ADMIN_PASSWORD = "dogae123!";
-
-    // ===== 상태 / DOM =====
     let isAdmin = JSON.parse(sessionStorage.getItem('isAdmin') || 'false');
-    let editingKey = null; // 편집 중 키 (이름 기반)
+    let editingKey = null;
 
     const viewPublic = document.getElementById('viewPublic');
     const viewAdmin  = document.getElementById('viewAdmin');
     const tbodyPublic = document.getElementById('tbodyPublic');
     const tbodyAdmin  = document.getElementById('tbodyAdmin');
-
     const cardsPublic = document.getElementById('cardsPublic');
 
     const adminBtn = document.getElementById('adminBtn');
@@ -231,10 +224,8 @@
     const formCancel = document.getElementById('formCancel');
 
     // ===== 유틸 =====
-    const esc = s => String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
-
+    const esc = s => String(s).replace(/[&<>\"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\\'':'&#39;'}[m]));
     function parseTimeToMs(v){
-      // 입력: "mm:ss.mmm" 또는 총초(초.밀리)
       const s = String(v).trim();
       if(!s) return NaN;
       if(s.includes(':')){
@@ -255,10 +246,7 @@
       const minutes = Math.floor(total/60000);
       const seconds = Math.floor((total%60000)/1000);
       const millis  = total%1000;
-      const mm = String(minutes).padStart(2,'0');
-      const ss = String(seconds).padStart(2,'0');
-      const mmm= String(millis).padStart(3,'0');
-      return `${mm}:${ss}.${mmm}`;
+      return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${String(millis).padStart(3,'0')}`;
     }
     function toggleView(){
       viewPublic.classList.toggle('hidden', isAdmin);
@@ -275,10 +263,10 @@
     pwOk.onclick = ()=>{
       if(pwInput.value === ADMIN_PASSWORD){ isAdmin = true; toggleView(); close(pwModal); }
       else alert('비밀번호가 올바르지 않습니다.');
-    }
+    };
     pwCancel.onclick = ()=> close(pwModal);
     logoutBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
-    backBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
+    backBtn.onclick   = ()=>{ isAdmin=false; toggleView(); };
 
     addBtn && (addBtn.onclick = ()=>{
       editingKey = null;
@@ -287,13 +275,12 @@
       open(formModal); nameInput.focus();
     });
     formCancel.onclick = ()=> close(formModal);
-
     formSave.onclick = async ()=>{
       const name = nameInput.value.trim();
       const klass = classInput.value.trim();
       const ms = parseTimeToMs(timeInput.value);
       if(!name || isNaN(ms)) return alert('이름과 시간 형식을 확인하세요. 예) 05:07.008');
-      const key = editingKey || name; // 간단 버전: 이름을 키로 사용
+      const key = editingKey || name; // 간단: 이름을 키로 사용
       await db.ref('participants/'+key).set({name, klass, timeMs: ms, time: (ms/1000)});
       close(formModal);
     };
@@ -315,12 +302,12 @@
     // ===== 렌더링 =====
     let list = [];
     function renderPublic(){
-      // 표 렌더
+      // 표
       if(list.length===0){
-        tbodyPublic.innerHTML = `<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>`;
+        tbodyPublic.innerHTML = '<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>';
       } else {
         tbodyPublic.innerHTML = list.map((p,i)=>{
-          const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
+          const medal = i===0?'gold':i===1?'silver':i===2?'bronze':'';
           const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
           return `<tr>
             <td class="rank-badge">${badge}</td>
@@ -330,11 +317,10 @@
           </tr>`;
         }).join('');
       }
-
-      // 모바일 카드 렌더
+      // 모바일 카드
       if(cardsPublic){
         cardsPublic.innerHTML = list.map((p,i)=>{
-          const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
+          const medal = i===0?'gold':i===1?'silver':i===2?'bronze':'';
           const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
           const timeTxt = formatMs(p.timeMs ?? (Number(p.time)||0)*1000);
           return `<div class="list-card">
@@ -350,7 +336,6 @@
         }).join('');
       }
     }
-
     function renderAdmin(){
       tbodyAdmin.innerHTML = list.map(p=>{
         return `<tr>
@@ -367,9 +352,9 @@
       }).join('');
     }
 
-    // 전역 핸들러(테이블 내 onClick에서 사용)
-    window.editRow = (name)=>{ const p = list.find(x=>x.name===name); if(p) onEdit(p); }
-    window.deleteRow = async (name)=>{ const p = list.find(x=>x.name===name); if(p) await onDelete(p); }
+    // 전역 핸들러(테이블 내 호출)
+    window.editRow = (name)=>{ const p=list.find(x=>x.name===name); if(p) onEdit(p); }
+    window.deleteRow = async (name)=>{ const p=list.find(x=>x.name===name); if(p) await onDelete(p); }
 
     // ===== 실시간 구독 =====
     db.ref('participants').on('value', snap => {
@@ -388,5 +373,3 @@
   </script>
 </body>
 </html>
-
-

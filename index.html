@@ -20,22 +20,25 @@
     body{
       margin:0; font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink);
       background:linear-gradient(180deg,#f7f2ff, #f1eaff 60%, #efe7ff);
+      font-size: clamp(14px, 2.6vw, 16px);
     }
     header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
     header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
     .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
-    .logo img{height:40px; width:auto; border-radius:50%;}
-    .title-center{font-weight:800; font-size:20px; text-align:center; color:var(--ink);}
+    .logo img{height:clamp(28px, 6vw, 50px); width:auto; border-radius:50%;}
+    .title-center{font-weight:800; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink);}
 
-    .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; font-weight:700}
+    .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:12px; font-weight:700}
     .btn-primary{background:var(--primary); color:#fff}
     .btn-ghost{background:#fff; color:var(--ink); border:1px solid #e5e7eb}
     .btn-danger{background:var(--danger); color:#fff}
 
-    .container{max-width:980px; margin:0 auto; padding:20px}
+    .container{max-width:980px; margin:0 auto; padding:clamp(12px,4vw,20px)}
     .card{background:var(--card); border:1px solid #eee; border-radius:16px; padding:18px; box-shadow:0 10px 26px rgba(17,12,46,.08)}
 
+    /* 표(데스크톱/태블릿) */
     .ranking{overflow:hidden}
+    .table-wrap{width:100%; overflow-x:auto}
     table{width:100%; border-collapse:collapse}
     thead th{font-size:12px; letter-spacing:.6px; color:#6b7280; text-align:left; padding:12px 16px; border-bottom:1px solid var(--line)}
     tbody td{padding:14px 16px; border-bottom:1px solid var(--line)}
@@ -49,6 +52,15 @@
     .sub{font-size:12px; color:#6b7280; margin-top:4px}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; letter-spacing:.6px}
 
+    /* B안: 모바일에서 카드형 리스트 표시 */
+    .list-cards{display:none}
+    .list-card{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff}
+    .list-card .who{display:flex; align-items:flex-start; gap:10px}
+    .list-card .names{display:flex; flex-direction:column}
+    .list-card .klass{font-size:12px; color:var(--muted)}
+    .list-card .time{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:700}
+
+    /* 관리자 */
     .adminHeader{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
     .actions{display:flex; gap:8px}
     .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center}
@@ -58,14 +70,27 @@
     input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
 
     .hidden{display:none !important}
+
+    /* 반응형 전환 지점 */
+    @media (max-width: 540px){
+      .ranking table{display:none}
+      .list-cards{display:flex; flex-direction:column; gap:10px}
+    }
+    @media (max-width: 360px){
+      .logo span{display:none}
+      .title-center{font-size:16px}
+    }
+
+    /* 이미지가 영역을 넘지 않도록 기본 가드 */
+    img{max-width:100%; height:auto}
   </style>
 </head>
 <body>
   <header>
     <div class="inner">
       <div class="logo">
-        <!-- 배지/로고 이미지: 파일명을 프로젝트에 맞게 바꿔도 됨 -->
-        <img src="drone.png" alt="DOGO 로고" style="width:100px; height:auto;>
+        <!-- 배지/로고 이미지: 프로젝트에 실제로 올린 파일명으로 변경하세요 -->
+        <img src="drone.png" alt="DOGO 로고">
         <span>DOGO</span>
       </div>
       <div class="title-center">드론 레이싱</div>
@@ -81,17 +106,22 @@
     <section id="viewPublic">
       <div class="card ranking">
         <h3 class="title-center" style="color:var(--primary); margin-top:0">랭킹</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>RANK</th>
-              <th>NAME</th>
-              <th>CLASS</th>
-              <th>TIME</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyPublic"></tbody>
-        </table>
+        <!-- 데스크톱/태블릿: 표 -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>RANK</th>
+                <th>NAME</th>
+                <th>CLASS</th>
+                <th>TIME</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPublic"></tbody>
+          </table>
+        </div>
+        <!-- 모바일: 카드 -->
+        <div id="cardsPublic" class="list-cards" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -103,17 +133,19 @@
       </div>
       <div class="card">
         <h3 style="margin:6px 0 14px">기록 관리</h3>
-        <table class="table-admin">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Class</th>
-              <th>Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyAdmin"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table-admin">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Time</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyAdmin"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
@@ -178,6 +210,8 @@
     const viewAdmin  = document.getElementById('viewAdmin');
     const tbodyPublic = document.getElementById('tbodyPublic');
     const tbodyAdmin  = document.getElementById('tbodyAdmin');
+
+    const cardsPublic = document.getElementById('cardsPublic');
 
     const adminBtn = document.getElementById('adminBtn');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -247,12 +281,12 @@
     logoutBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
     backBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
 
-    addBtn.onclick = ()=>{
+    addBtn && (addBtn.onclick = ()=>{
       editingKey = null;
       formTitle.textContent = '기록 추가';
       nameInput.value=''; classInput.value=''; timeInput.value='';
       open(formModal); nameInput.focus();
-    };
+    });
     formCancel.onclick = ()=> close(formModal);
 
     formSave.onclick = async ()=>{
@@ -282,19 +316,40 @@
     // ===== 렌더링 =====
     let list = [];
     function renderPublic(){
+      // 표 렌더
       if(list.length===0){
-        tbodyPublic.innerHTML = `<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>`; return;
+        tbodyPublic.innerHTML = `<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>`;
+      } else {
+        tbodyPublic.innerHTML = list.map((p,i)=>{
+          const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
+          const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
+          return `<tr>
+            <td class="rank-badge">${badge}</td>
+            <td><div class="name">${esc(p.name)}</div></td>
+            <td>${esc(p.klass||'')}</td>
+            <td class="mono">${formatMs(p.timeMs ?? (Number(p.time)||0)*1000)}</td>
+          </tr>`;
+        }).join('');
       }
-      tbodyPublic.innerHTML = list.map((p,i)=>{
-        const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
-        const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
-        return `<tr>
-          <td class="rank-badge">${badge}</td>
-          <td><div class="name">${esc(p.name)}</div></td>
-          <td>${esc(p.klass||'')}</td>
-          <td class="mono">${formatMs(p.timeMs ?? (Number(p.time)||0)*1000)}</td>
-        </tr>`;
-      }).join('');
+
+      // 모바일 카드 렌더
+      if(cardsPublic){
+        cardsPublic.innerHTML = list.map((p,i)=>{
+          const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
+          const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
+          const timeTxt = formatMs(p.timeMs ?? (Number(p.time)||0)*1000);
+          return `<div class="list-card">
+            <div class="who">
+              <div class="rank-badge">${badge}</div>
+              <div class="names">
+                <div class="name">${esc(p.name)}</div>
+                <div class="klass">${esc(p.klass||'')}</div>
+              </div>
+            </div>
+            <div class="time">${timeTxt}</div>
+          </div>`;
+        }).join('');
+      }
     }
 
     function renderAdmin(){
@@ -334,6 +389,3 @@
   </script>
 </body>
 </html>
-
-
-

@@ -440,7 +440,7 @@ header .inner > div:last-child {
     adminBtn.onclick = ()=>{ if(!isAdmin){ open(pwModal); pwInput.value=''; pwInput.focus(); } };
     pwOk.onclick = ()=>{
       if(pwInput.value === ADMIN_PASSWORD){ isAdmin = true; toggleView(); close(pwModal); }
-      else alert('비밀번호가 올바르지 않습니다.');
+      else alert('코드가 올바르지 않습니다.');
     }
     pwCancel.onclick = ()=> close(pwModal);
     logoutBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
@@ -580,6 +580,7 @@ header .inner > div:last-child {
   </script>
 </body>
 </html>
+
 
 
 

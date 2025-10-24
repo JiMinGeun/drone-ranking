@@ -64,7 +64,7 @@
     .adminHeader{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
     .actions{display:flex; gap:8px}
     .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center}
-    .modal::before{content:''; position:absolute; inset:0; background:rgba(0,0,0,.45)}
+    .modal::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px); }
     .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px}
     .form-row{display:flex; gap:8px; margin-top:10px}
     input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
@@ -90,7 +90,7 @@
     <div class="inner">
       <div class="logo">
         <!-- 배지/로고 이미지: 프로젝트에 실제로 올린 파일명으로 변경하세요 -->
-        <img src="drone.png" alt="DOGO 로고">
+        <img src="drone.png" alt="DOGO 로고" class="logo-img">
         <span>DOGO</span>
       </div>
       <div class="title-center">드론 레이싱</div>
@@ -155,11 +155,10 @@
     <div class="box">
       <h3 style="margin:0 0 10px">관리자 비밀번호</h3>
       <input id="pwInput" type="password" placeholder="비밀번호 입력" />
-      <div class="form-row" style="justify-content:flex-end">
+      <div class="form-row" style="justify-content:center">
         <button id="pwCancel" class="btn btn-ghost">취소</button>
         <button id="pwOk" class="btn btn-primary">확인</button>
       </div>
-      <p class="sub" style="margin:6px 0 0">* 간단 보호용입니다. 보안이 필요하면 Firebase Auth 권장</p>
     </div>
   </div>
 
@@ -389,3 +388,4 @@
   </script>
 </body>
 </html>
+

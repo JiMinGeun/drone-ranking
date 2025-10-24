@@ -2,86 +2,153 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>드론 레이싱</title>
   <style>
     :root{
-      --bg:#f6efff;
+      --bg:#f6f4ff;
       --ink:#0f172a;
       --card:#ffffff;
       --muted:#6b7280;
       --primary:#7c3aed;
+      --primary-ink:#f5f3ff;
       --accent:#f59e0b;
       --danger:#ef4444;
-      --line:#e5e7eb;
+      --line:#e9eaf0;
+      --ring:#c4b5fd;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink);
+      margin:0;
+      font-family:'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      color:var(--ink);
       background:linear-gradient(180deg,#f7f2ff, #f1eaff 60%, #efe7ff);
-      font-size: clamp(14px, 2.6vw, 16px);
+      font-size: clamp(15px, 2.4vw, 17px);
+      line-height: 1.55;
     }
+
+    /* 헤더 */
     header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
     header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
     .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
     .logo img{height:clamp(28px, 6vw, 50px); width:auto; border-radius:50%;}
-    .title-center{font-weight:800; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink);}
+    .title-center{font-weight:900; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink); letter-spacing:.4px;}
 
-    .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:12px; font-weight:700}
-    .btn-primary{background:var(--primary); color:#fff}
-    .btn-ghost{background:#fff; color:var(--ink); border:1px solid #e5e7eb}
+    /* 버튼 */
+    .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:14px; font-weight:700; position:relative; transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;}
+    .btn:active{ transform: translateY(1px); }
+    .btn:focus-visible{ outline:2px solid var(--ring); outline-offset:2px }
+    .btn-primary{background:linear-gradient(180deg,#8b5cf6, #7c3aed); color:var(--primary-ink)}
+    .btn-primary:hover{filter:brightness(1.03)}
+    .btn-ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+    .btn-ghost:hover{ background:#fafafa; }
     .btn-danger{background:var(--danger); color:#fff}
+    .btn-danger:hover{ filter:brightness(1.03) }
 
     .container{max-width:980px; margin:0 auto; padding:clamp(12px,4vw,20px)}
-    .card{background:var(--card); border:1px solid #eee; border-radius:16px; padding:18px; box-shadow:0 10px 26px rgba(17,12,46,.08)}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:20px;
+      box-shadow:0 6px 18px rgba(17,12,46,.05);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(17,12,46,.08); }
 
     /* 표(데스크톱/태블릿) */
     .ranking{overflow:hidden}
-    .table-wrap{width:100%; overflow-x:auto}
-    table{width:100%; border-collapse:collapse}
-    thead th{font-size:12px; letter-spacing:.6px; color:#6b7280; text-align:left; padding:12px 16px; border-bottom:1px solid var(--line)}
+    .table-wrap{ position:relative; max-height: 65vh; overflow:auto; border-radius:12px; border:1px solid var(--line) }
+    table{width:100%; border-collapse:separate; border-spacing:0}
+    thead th{
+      position: sticky; top:0; z-index:1;
+      background:#fff; font-size:12px; letter-spacing:.5px; color:#6b7280; text-align:left;
+      padding:12px 16px; border-bottom:1px solid var(--line)
+    }
     tbody td{padding:14px 16px; border-bottom:1px solid var(--line)}
     tbody tr:nth-child(odd){background:#fafafa}
-    .rank-badge{font-weight:800; display:flex; align-items:center; gap:8px}
-    .medal{width:22px; height:22px; display:inline-grid; place-items:center; border-radius:999px; font-size:14px}
-    .medal.gold{background:#fff7db; color:#b45309}
-    .medal.silver{background:#eef2ff; color:#475569}
-    .medal.bronze{background:#fff0d6; color:#b45309}
+    tbody tr:hover{ background:#fafaff }
+
+    .rank-badge{font-weight:800; display:flex; align-items:center; gap:10px}
+    .medal{width:24px; height:24px; display:inline-grid; place-items:center; border-radius:999px; font-size:14px; border:1px solid #0001; box-shadow: inset 0 0 0 2px #fff6;}
+    .medal.gold{  background: radial-gradient(circle at 30% 30%, #fff4bf, #f5d14b); color:#7c4a00 }
+    .medal.silver{background: radial-gradient(circle at 30% 30%, #eef2ff, #c7d2fe); color:#364152 }
+    .medal.bronze{background: radial-gradient(circle at 30% 30%, #ffd9b0, #f5b36b); color:#7a3d00 }
     .name{font-weight:700}
     .sub{font-size:12px; color:#6b7280; margin-top:4px}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-weight:700; letter-spacing:.6px}
 
-    /* B안: 모바일에서 카드형 리스트 표시 */
+    /* 모바일 카드 리스트 */
     .list-cards{display:none}
-    .list-card{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff}
+    .list-card{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff;
+      box-shadow: 0 4px 10px rgba(17,12,46,.04);
+    }
     .list-card .who{display:flex; align-items:flex-start; gap:10px}
     .list-card .names{display:flex; flex-direction:column}
     .list-card .klass{font-size:12px; color:var(--muted)}
-    .list-card .time{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:700}
+    .list-card .time{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:700; font-size:15px}
 
-    /* 관리자 */
+    /* 관리자 영역 */
     .adminHeader{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
     .actions{display:flex; gap:8px}
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center}
+    .actions .btn{ width:36px; height:36px; padding:0; justify-content:center; border-radius:999px; }
+    .actions .btn-ghost{ border-color:transparent; }
+    .actions .btn-ghost:hover{ background:#f3f4f6; }
+
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; transition: opacity .18s ease;}
     .modal::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px); }
-    .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px}
+    .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px; animation: pop .18s ease }
     .form-row{display:flex; gap:8px; margin-top:10px}
     input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
+    input:focus{ outline:2px solid var(--ring); outline-offset:2px; border-color: transparent }
 
     .hidden{display:none !important}
 
-    /* 반응형 전환 지점 */
+    /* 빈 상태 + 스켈레톤 */
+    .empty{ padding:28px 16px; text-align:center; color:var(--muted); }
+    .empty .emoji{ font-size:22px; display:block; margin-bottom:6px; }
+
+    .row-flash{ animation: flashRow 1.4s ease }
+    @keyframes flashRow{ 0%{ background:#fdf4ff } 50%{ background:#fff } 100%{ background:#fff } }
+
+    @keyframes sk{0%{background-position:0 0}100%{background-position:200% 0}}
+    @keyframes pop{from{ transform: scale(.97); opacity:.7 } to{ transform: scale(1); opacity:1 }}
+
+    .input-error{ border-color:#fecaca !important; background:#fff1f2 }
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px }
+
+    /* 접근성 */
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* 반응형 */
     @media (max-width: 540px){
       .ranking table{display:none}
       .list-cards{display:flex; flex-direction:column; gap:10px}
+      .list-card{ align-items:flex-start }
+      .list-card .who{ gap:12px }
+      .list-card .names .name{ line-height:1.2 }
+      .list-card .time{ margin-left:auto }
     }
     @media (max-width: 360px){
       .logo span{display:none}
       .title-center{font-size:16px}
     }
 
-    /* 이미지가 영역을 넘지 않도록 기본 가드 */
+    /* 다크모드 (선택적) */
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b0c10; --ink:#eef2ff; --card:#0f1220; --muted:#a3aed0; --line:#1b1f33; --primary:#a78bfa; --primary-ink:#0b0c10; }
+      body{ background:linear-gradient(180deg,#0d0f1a, #0c0f1a 60%, #0c0e19) }
+      header{ background:#0f1220cc; border-bottom:1px solid #0f1220 }
+      .btn-ghost{ background:#0f1220; border-color:#1b1f33; color:var(--ink) }
+      .table-wrap{ border-color:#1b1f33 }
+      thead th{ background:#0f1220 }
+      tbody tr:hover{ background:#131733 }
+    }
+
+    /* 이미지 보호 */
     img{max-width:100%; height:auto}
   </style>
 </head>
@@ -89,14 +156,13 @@
   <header>
     <div class="inner">
       <div class="logo">
-        <!-- 배지/로고 이미지: 프로젝트에 실제로 올린 파일명으로 변경하세요 -->
         <img src="drone.png" alt="DOGO 로고" style="width:80px; height:auto;">
         <span>DOGO</span>
       </div>
       <div class="title-center">드론 레이싱</div>
       <div>
-        <button id="adminBtn" class="btn btn-ghost">Admin</button>
-        <button id="logoutBtn" class="btn btn-ghost hidden">로그아웃</button>
+        <button id="adminBtn" class="btn btn-ghost" type="button">Admin</button>
+        <button id="logoutBtn" class="btn btn-ghost hidden" type="button">로그아웃</button>
       </div>
     </div>
   </header>
@@ -105,16 +171,20 @@
     <!-- 공개 랭킹 뷰 -->
     <section id="viewPublic">
       <div class="card ranking">
-        <h3 class="title-center" style="color:var(--primary); margin-top:0">랭킹</h3>
+        <h3 class="title-center" style="color:var(--primary); margin:0 0 8px">랭킹</h3>
+        <p class="sub" style="margin:0 0 16px; text-align:center">
+          <span aria-hidden="true">🏁</span> 시즌 2025-Fall · 실시간 업데이트
+        </p>
+
         <!-- 데스크톱/태블릿: 표 -->
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>RANK</th>
-                <th>NAME</th>
-                <th>CLASS</th>
-                <th>TIME</th>
+                <th scope="col">RANK</th>
+                <th scope="col">NAME</th>
+                <th scope="col">CLASS</th>
+                <th scope="col">TIME</th>
               </tr>
             </thead>
             <tbody id="tbodyPublic"></tbody>
@@ -126,10 +196,10 @@
     </section>
 
     <!-- 관리자 뷰 -->
-    <section id="viewAdmin" class="hidden">
+    <section id="viewAdmin" class="hidden" aria-label="관리자 화면">
       <div class="adminHeader">
-        <button id="backBtn" class="btn btn-primary">← 뒤로가기</button>
-        <button id="addBtn" class="btn btn-primary">＋ 추가하기</button>
+        <button id="backBtn" class="btn btn-primary" type="button">← 뒤로가기</button>
+        <button id="addBtn" class="btn btn-primary" type="button">＋ 추가하기</button>
       </div>
       <div class="card">
         <h3 style="margin:6px 0 14px">기록 관리</h3>
@@ -137,10 +207,10 @@
           <table class="table-admin">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Time</th>
-                <th>Actions</th>
+                <th scope="col">Name</th>
+                <th scope="col">Class</th>
+                <th scope="col">Time</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="tbodyAdmin"></tbody>
@@ -151,31 +221,32 @@
   </main>
 
   <!-- 비밀번호 모달 -->
-  <div id="pwModal" class="modal" aria-hidden="true">
+  <div id="pwModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="관리자 비밀번호 입력">
     <div class="box" style="justify-content:center">
       <h3 style="margin:0 0 10px">관리자 비밀번호</h3>
-      <input id="pwInput" type="password" placeholder="비밀번호 입력" />
+      <input id="pwInput" type="password" placeholder="비밀번호 입력" aria-label="관리자 비밀번호"/>
       <div class="form-row" style="justify-content:center">
-        <button id="pwCancel" class="btn btn-ghost">취소</button>
-        <button id="pwOk" class="btn btn-primary">확인</button>
+        <button id="pwCancel" class="btn btn-ghost" type="button">취소</button>
+        <button id="pwOk" class="btn btn-primary" type="button">확인</button>
       </div>
     </div>
   </div>
 
   <!-- 추가/수정 모달 -->
-  <div id="formModal" class="modal" aria-hidden="true">
+  <div id="formModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="기록 추가 또는 수정">
     <div class="box">
       <h3 id="formTitle" style="margin:0 0 10px">기록 추가</h3>
       <div class="form-row">
-        <input id="nameInput" placeholder="이름" />
-        <input id="classInput" placeholder="학급 (예: 고1-3)" />
+        <input id="nameInput" placeholder="이름" aria-label="이름 입력"/>
+        <input id="classInput" placeholder="학급 (예: 고1-3)" aria-label="학급 입력"/>
       </div>
       <div class="form-row">
-        <input id="timeInput" placeholder="기록 (예: 05:07.008 또는 307.008)" />
+        <input id="timeInput" placeholder="기록 (예: 05:07.008 또는 307.008)" aria-label="기록 시간 입력"/>
       </div>
+      <p class="hint">형식 예: <code>02:15.125</code> 또는 <code>135.125</code></p>
       <div class="form-row" style="justify-content:flex-end">
-        <button id="formCancel" class="btn btn-ghost">취소</button>
-        <button id="formSave" class="btn btn-primary">저장</button>
+        <button id="formCancel" class="btn btn-ghost" type="button">취소</button>
+        <button id="formSave" class="btn btn-primary" type="button">저장</button>
       </div>
     </div>
   </div>
@@ -204,12 +275,12 @@
     // ===== 상태 / DOM =====
     let isAdmin = JSON.parse(sessionStorage.getItem('isAdmin') || 'false');
     let editingKey = null; // 편집 중 키 (이름 기반)
+    let lastTopName = null; // 1위 하이라이트 비교용
 
     const viewPublic = document.getElementById('viewPublic');
     const viewAdmin  = document.getElementById('viewAdmin');
     const tbodyPublic = document.getElementById('tbodyPublic');
     const tbodyAdmin  = document.getElementById('tbodyAdmin');
-
     const cardsPublic = document.getElementById('cardsPublic');
 
     const adminBtn = document.getElementById('adminBtn');
@@ -260,6 +331,7 @@
       const mmm= String(millis).padStart(3,'0');
       return `${mm}:${ss}.${mmm}`;
     }
+
     function toggleView(){
       viewPublic.classList.toggle('hidden', isAdmin);
       viewAdmin.classList.toggle('hidden', !isAdmin);
@@ -267,8 +339,21 @@
       logoutBtn.classList.toggle('hidden', !isAdmin);
       sessionStorage.setItem('isAdmin', JSON.stringify(isAdmin));
     }
-    function open(el){ el.style.display='flex'; }
-    function close(el){ el.style.display='none'; }
+    function open(el){ el.style.display='flex'; el.setAttribute('aria-hidden','false'); }
+    function close(el){ el.style.display='none'; el.setAttribute('aria-hidden','true'); }
+
+    // ===== 초기 로딩 스켈레톤 =====
+    function showSkeleton(){
+      const rows = Array.from({length:6}, ()=>(
+        `<tr>
+          <td colspan="4" style="padding:14px 16px">
+            <div style="height:16px; background:linear-gradient(90deg,#eee,#f5f5f9,#eee); background-size:200% 100%; border-radius:8px; animation: sk 1.2s infinite linear;"></div>
+          </td>
+        </tr>`
+      )).join('');
+      tbodyPublic.innerHTML = rows;
+    }
+    showSkeleton();
 
     // ===== 모달/버튼 동작 =====
     adminBtn.onclick = ()=>{ if(!isAdmin){ open(pwModal); pwInput.value=''; pwInput.focus(); } };
@@ -280,19 +365,39 @@
     logoutBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
     backBtn.onclick = ()=>{ isAdmin=false; toggleView(); };
 
+    // Enter로 모달 제출
+    pwInput.addEventListener('keydown', e=>{ if(e.key==='Enter') pwOk.click(); });
+    [nameInput, classInput, timeInput].forEach(inp=>{
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') formSave.click(); });
+    });
+
     addBtn && (addBtn.onclick = ()=>{
       editingKey = null;
       formTitle.textContent = '기록 추가';
       nameInput.value=''; classInput.value=''; timeInput.value='';
+      nameInput.classList.remove('input-error'); timeInput.classList.remove('input-error');
       open(formModal); nameInput.focus();
     });
     formCancel.onclick = ()=> close(formModal);
 
+    function validateForm(){
+      nameInput.classList.remove('input-error');
+      timeInput.classList.remove('input-error');
+      const name = nameInput.value.trim();
+      const ms = parseTimeToMs(timeInput.value);
+      if(!name){ nameInput.classList.add('input-error'); }
+      if(isNaN(ms)){ timeInput.classList.add('input-error'); }
+      return !!(name && !isNaN(ms));
+    }
+
     formSave.onclick = async ()=>{
+      if(!validateForm()){
+        alert('이름과 시간 형식을 확인하세요. 예) 05:07.008 또는 307.008');
+        return;
+      }
       const name = nameInput.value.trim();
       const klass = classInput.value.trim();
       const ms = parseTimeToMs(timeInput.value);
-      if(!name || isNaN(ms)) return alert('이름과 시간 형식을 확인하세요. 예) 05:07.008');
       const key = editingKey || name; // 간단 버전: 이름을 키로 사용
       await db.ref('participants/'+key).set({name, klass, timeMs: ms, time: (ms/1000)});
       close(formModal);
@@ -304,6 +409,7 @@
       nameInput.value = p.name || '';
       classInput.value = p.klass || '';
       timeInput.value = formatMs(p.timeMs ?? (Number(p.time)||0)*1000);
+      nameInput.classList.remove('input-error'); timeInput.classList.remove('input-error');
       open(formModal);
     }
     async function onDelete(p){
@@ -315,14 +421,17 @@
     // ===== 렌더링 =====
     let list = [];
     function renderPublic(){
-      // 표 렌더
       if(list.length===0){
-        tbodyPublic.innerHTML = `<tr><td colspan="4" class="sub">아직 참가자가 없습니다.</td></tr>`;
+        tbodyPublic.innerHTML = `<tr><td colspan="4">
+          <div class="empty"><span class="emoji">🪁</span>아직 참가자가 없습니다. 상단 Admin에서 기록을 추가해 보세요.</div>
+        </td></tr>`;
       } else {
         tbodyPublic.innerHTML = list.map((p,i)=>{
+          const isTop = i===0;
           const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
           const badge = medal ? `<span class="medal ${medal}">🏅</span>` : `<strong>${i+1}</strong>`;
-          return `<tr>
+          const rowClass = (isTop && p.name !== lastTopName) ? 'row-flash' : '';
+          return `<tr class="${rowClass}">
             <td class="rank-badge">${badge}</td>
             <td><div class="name">${esc(p.name)}</div></td>
             <td>${esc(p.klass||'')}</td>
@@ -331,7 +440,7 @@
         }).join('');
       }
 
-      // 모바일 카드 렌더
+      // 모바일 카드
       if(cardsPublic){
         cardsPublic.innerHTML = list.map((p,i)=>{
           const medal = i===0? 'gold' : i===1? 'silver' : i===2? 'bronze' : '';
@@ -349,6 +458,8 @@
           </div>`;
         }).join('');
       }
+
+      if(list[0]) lastTopName = list[0].name;
     }
 
     function renderAdmin(){
@@ -359,8 +470,8 @@
           <td class="mono">${formatMs(p.timeMs ?? (Number(p.time)||0)*1000)}</td>
           <td>
             <div class="actions">
-              <button class="btn btn-ghost" onclick='editRow("${esc(p.name)}")'>✎</button>
-              <button class="btn btn-danger" onclick='deleteRow("${esc(p.name)}")'>🗑</button>
+              <button class="btn btn-ghost" type="button" aria-label="편집" onclick='editRow("${esc(p.name)}")'>✎</button>
+              <button class="btn btn-danger" type="button" aria-label="삭제" onclick='deleteRow("${esc(p.name)}")'>🗑</button>
             </div>
           </td>
         </tr>`;
@@ -388,5 +499,3 @@
   </script>
 </body>
 </html>
-
-

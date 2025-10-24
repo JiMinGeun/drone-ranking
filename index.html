@@ -98,8 +98,8 @@
     .actions .btn-ghost{ border-color:transparent; }
     .actions .btn-ghost:hover{ background:#f3f4f6; }
 
-    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; transition: opacity .18s ease;}
-    .modal::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px); }
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; transition: opacity .18s ease; z-index: 9999;}
+    .modal::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px); z-index: 0;}
     .modal .box{position:relative; z-index:1; width:100%; max-width:440px; background:#fff; border-radius:16px; padding:18px; animation: pop .18s ease }
     .form-row{display:flex; gap:8px; margin-top:10px}
     input{flex:1; padding:12px 12px; border-radius:12px; border:1px solid #e5e7eb; font-size:14px}
@@ -499,3 +499,4 @@
   </script>
 </body>
 </html>
+

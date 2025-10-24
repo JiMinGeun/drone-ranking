@@ -29,13 +29,11 @@
     }
 
     /* 헤더 */
-    header { position: sticky; top: 0; backdrop-filter: saturate(180%) blur(8px); background: #ffffffcc; border-bottom: 1px solid #ffffff; }
-    header .inner { max-width: 980px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
-    .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; letter-spacing: .8px; position: absolute; left: 20px; top: 50%; transform: translateY(-50%);}
-    header .inner { max-width: 980px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
-    .logo img { height: clamp(28px, 6vw, 50px); width: auto; border-radius: 50%; }
-    .title-center { font-weight: 900; font-size: clamp(16px, 4.5vw, 20px); text-align: center; color: var(--ink); letter-spacing: .4px; }
-
+    header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
+    header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
+    .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
+    .logo img{height:clamp(28px, 6vw, 50px); width:auto; border-radius:50%;}
+    .title-center{font-weight:900; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink); letter-spacing:.4px;}
 
     /* 버튼 */
     .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:14px; font-weight:700; position:relative; transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;}
@@ -158,7 +156,7 @@
   <header>
     <div class="inner">
       <div class="logo">
-        <img src="drone.png" alt="DOGO 로고" style="width:120px; height:auto;">
+        <img src="drone.png" alt="DOGO 로고" style="width:100px; height:auto;">
       </div>
       <div class="title-center">드론 레이싱</div>
       <div>
@@ -499,7 +497,4 @@
   </script>
 </body>
 </html>
-
-
-
-
+이제 개선점이 뭐가있을까

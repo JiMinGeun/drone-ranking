@@ -16,6 +16,8 @@
       --danger:#ef4444;
       --line:#e9eaf0;
       --ring:#c4b5fd;
+      --logoH: 120px;
+      --padY: 10px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -32,7 +34,7 @@
     header { position: sticky; top: 0; backdrop-filter: saturate(180%) blur(8px); background: #ffffffcc; border-bottom: 1px solid #ffffff; }
     header .inner { max-width: 980px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: center; position: relative; }
     .logo { display: flex; align-items: center; gap: 8px; font-weight: 900; letter-spacing: .8px; position: absolute; left: 20px; top: 50%; transform: translateY(-50%);}
-    header .inner > div:last-child { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+    header .inner { position: relative; display: flex; justify-content: center; align-items: center; padding: var(--padY) 20px; min-height: calc(var(--logoH) + var(--padY) * 2); }
     .logo img { height: clamp(28px, 6vw, 50px); width: auto; border-radius: 50%; }
     .title-center { font-weight: 900; font-size: clamp(16px, 4.5vw, 20px); text-align: center; color: var(--ink); letter-spacing: .4px; }
 
@@ -499,5 +501,6 @@
   </script>
 </body>
 </html>
+
 
 

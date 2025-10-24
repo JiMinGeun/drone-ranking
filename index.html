@@ -29,11 +29,58 @@
     }
 
     /* 헤더 */
-    header{position:sticky; top:0; backdrop-filter:saturate(180%) blur(8px); background:#ffffffcc; border-bottom:1px solid #ffffff;}
-    header .inner{max-width:980px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
-    .logo{display:flex; align-items:center; gap:8px; font-weight:900; letter-spacing:.8px;}
-    .logo img{height:clamp(28px, 6vw, 50px); width:auto; border-radius:50%;}
-    .title-center{font-weight:900; font-size:clamp(16px, 4.5vw, 20px); text-align:center; color:var(--ink); letter-spacing:.4px;}
+/* 헤더 */
+header {
+  position: sticky;
+  top: 0;
+  backdrop-filter: saturate(180%) blur(8px);
+  background: #ffffffcc;
+  border-bottom: 1px solid #ffffff;
+}
+
+header .inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 가운데 기준 */
+  position: relative;      /* 자식 absolute 기준 */
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  letter-spacing: .8px;
+  position: absolute;
+  left: 20px;              /* 왼쪽 고정 */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+header .inner > div:last-child {
+  position: absolute;
+  right: 20px;             /* 오른쪽 고정 */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.logo img {
+  height: clamp(28px, 6vw, 50px);
+  width: auto;
+  border-radius: 50%;
+}
+
+.title-center {
+  font-weight: 900;
+  font-size: clamp(16px, 4.5vw, 20px);
+  text-align: center;
+  color: var(--ink);
+  letter-spacing: .4px;
+}
+
 
     /* 버튼 */
     .btn{border:0; cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:clamp(8px,1.8vw,10px) clamp(10px,3vw,14px); border-radius:14px; font-weight:700; position:relative; transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;}
@@ -498,3 +545,4 @@
 </body>
 </html>
 이제 개선점이 뭐가있을까
+
